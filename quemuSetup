@@ -1,0 +1,28 @@
+#!/bin/bash
+
+#to setup network using ovs
+sudo ovsdb-server --remote=punix:/usr/local/var/run/openvswitch/db.sock \
+                     --remote=db:Open_vSwitch,Open_vSwitch,manager_options \
+                     --private-key=db:Open_vSwitch,SSL,private_key \
+                     --certificate=db:Open_vSwitch,SSL,certificate \
+                     --bootstrap-ca-cert=db:Open_vSwitch,SSL,ca_cert \
+                     --pidfile --detach
+sudo ovs-vsctl --no-wait init
+sudo ovs-vswitchd --pidfile --detach
+
+sudo ovs-vsctl add-port br-int eth5
+sudo ifconfig eth5 0
+sudo ifconfig  br-int 192.168.122.209 netmask 255.255.255.0
+sudo route add default gw 192.168.122.2 br-int
+sudo chmod a+x /etc/openvswitch/ovs-ifup
+sudo chmod a+x /etc/openvswitch/ovs-ifdown
+
+#to launch qemu/kvm, you will need the debian image files
+
+sudo kvm -m 128 -name guest1 -net nic,macaddr=52:54:00:00:01:00 -net tap,ifname=r1-eth0,script=/etc/openvswitch/ovs-ifup,downscript=/etc/openvswitch/ovs-ifdown  guest1.img & 
+
+sudo kvm -m 128 -name guest2 -net nic,macaddr=52:54:00:00:02:00 -net tap,ifname=r2-eth0,script=/etc/openvswitch/ovs-ifup,downscript=/etc/openvswitch/ovs-ifdown  guest2.img &
+
+sudo kvm -m 128 -name guest3 -net nic,macaddr=52:54:00:00:03:00 -net tap,ifname=r3-eth0,script=/etc/openvswitch/ovs-ifup,downscript=/etc/openvswitch/ovs-ifdown  guest3.img &
+
+
