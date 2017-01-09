@@ -38,33 +38,38 @@ def fileCompres(keyStamp):
 	conn = sqlite3.connect('tempDb.db')
 	cur = conn.cursor()
 	#temporary table later taken from configuration file with try and catch
+	cur.execute("select fileName from aaa order by priority;")
+	result = cur.fetchall()
 	#result=cur.execute("select * from details,aaa where 
 						#details.fileName=aaa.fileName and aaa.timeDetails>keyStamp")	
 	#cur.execute("drop table")
-	cur.execute("select * from details");
-	result = cur.fetchall()
-	#conn.close()
-	data=""
-	for row in result:
-		for uniqueData in row:
-			if type(uniqueData) != int:
-				data +=uniqueData+" "
-			else:
-				data +=str(uniqueData)
-		data +=' $ '
-	tempFile ='ravi'
-	uniQueCode = compressFile(data,tempFile)
-	key = uniQueCode[0]
-	fileName = uniQueCode[1]
-	conn.execute('''create table if not exists storeDb(key str,finalData blob);''')
-	if os.path.exists(os.getcwd()+'/'+fileName):
-			print "come"
-			with open(os.getcwd()+'/'+fileName,'rb') as fileData:
-				ablob = fileData.read()
-				sql = '''insert into storeDb values(?,?);'''
-				cur.execute(sql,[key,sqlite3.Binary(ablob)])
-				conn.commit()
+	print result
+	for i in result:
+		fileName1 = str(i[0])
+		cur.execute("select * from details where details.fileName='"+fileName1+"';");
+		res = cur.fetchall()
+		#conn.close()
+		data=""
+		for row in res:
+			for uniqueData in row:
+				if type(uniqueData) != int:
+					data +=uniqueData+" "
+				else:
+					data +=str(uniqueData)
+			data +=' $ '
+		tempFile =fileName1
+		uniQueCode = compressFile(data,tempFile)
+		key = uniQueCode[0]
+		fileName = uniQueCode[1]
+		conn.execute('''create table if not exists storeDb(key str,finalData blob);''')
+		if os.path.exists(os.getcwd()+'/'+fileName):
+				print "come"
+				with open(os.getcwd()+'/'+fileName,'rb') as fileData:
+					ablob = fileData.read()
+					sql = '''insert into storeDb values(?,?);'''
+					cur.execute(sql,[key,sqlite3.Binary(ablob)])
+					conn.commit()
 				#dbNew.close()
-			fileData.close()
-	conn.close()
+				fileData.close()
+		#conn.close()
 fileCompres(14152)
