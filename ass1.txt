@@ -1,0 +1,111 @@
+
+[ assignment
+
+[subject - [SE2-ASGN-SYNC-1]]
+[deadline - 10/01/2017]
+[note - group assignment]
+[attachment - a single file [rollno].tar.gz]
+[assignment text - [
+
+design and implement the 3 programs [file-watcher, compressor, and validator] in [python or any other language[s]]  
+[i will discuss and explain some issues in this problem in the next class [probably on 31/12/16]]
+
+[
+[file-watcher] - a program that will periodically
+ - read the contents of a given directory 
+ - if any new file[s] found,
+   for all new files found
+    - find the new file with highest priority,
+    - copy that file's contents to tempdb
+      [a sqlite3 db] [you must design the db as needed]
+ - else
+    sleep for tConfig.sleepDuration seconds and repeat again
+]
+
+[
+[compressor] - a program that will periodically 
+ - scan the tempdb assigned to it [via config] to see if any new file contents have arrived in it 
+ - if any new file[s] found,
+   for all new files found
+    - find the new file with highest priority,
+    - compress that file's contents and put the compressed contents along with 
+      its md5 hash value in tempdb-tgz-md5
+      [a sqlite3 db] [you must design the db as needed]
+ - else
+    sleep for tConfig.sleepDuration seconds and repeat again
+]
+
+[
+[validator] - a program that will periodically 
+ - query the tempdb assigned to it [via config] to see if any new file contents have arrived in it 
+ - if any new file[s] found,
+   for all new files found
+    - find the new file with highest priority,
+    - validate that file's contents and put the result of validation in the tempdb-tgz-md5
+      validation function has to check whether the file contents form a valid json record or not
+      matching to a given record format [see [jsonrecord] format and sample json files]
+      if valid record found
+        then
+        extract fields from json object
+        and insert the records in the tempdb-json db 
+         [a sqlite3 db] [you must design the db as needed]
+ - else
+    sleep for tConfig.sleepDuration seconds and repeat again
+]
+
+[
+user-system interaction rules
+ - user must copy the file, say fname.json, he/she wants to be processed in a designated directory,
+   say dir-target.
+ - after the file is completely copied the user must create a file named
+   .fname.json.<num> in the same directory dir-target
+ - the presence of .fname.json.<num> in the dir-target will indicate to the system that the user 
+   has finished copying the file
+ - after .fname.json.<num> is created, the user should NOT modify the contents of fname.json 
+   [else the system will not function properly]
+ - the part <num> in the .fname.json.<num> shall be used to indicate priority, with 0 being highest 
+   and as num increases the priority will decrease, with no higher limit
+ - the user may request to change the priority of a file using the following method 
+   [the system will try as much as possible to honour the user's priority change request]
+   - create a file named .fname.json.<oldnum>.<newnum>
+   - the system if notices such a priority change request for any pending files, 
+     will then change the priority of fname.json from oldnum to newnum
+
+]
+
+[
+challenging things - 
+ - you should handle as many exceptions/failures/crashes as possible with causing 
+   as little inconvenience to the user as possible 
+]
+
+[ [jsonrecord] 
+records of one or more persons
+where
+each person's record may have the following fields - 
+ - first name - mandatory [m]
+ - middle name - optional [o]
+ - last name - m
+ - age - o [integer between 1 and 100 inclusive]
+ - address - m
+   -- all subfields of address field are mandatory
+         "streetAddress": string
+         "city": string
+         "state": string of length at most 3
+         "postalCode": 6 digit sequence
+ - phoneNumbers - o
+   -- all subfields of phoneNumbers field are optional
+   a person can have zero or more home/office/mobile phone numbers 
+   but no two persons can have same home/office/mobile numbers
+   [
+   home/office number is of the form ddd-dddddddd
+   mobile number is of the form dddddddddd
+   where d is a digit
+   ]
+[sample json file] [https://glot.io/snippets/elnt30tu6o]
+
+]
+]
+]
+]
+
