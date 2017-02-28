@@ -1,0 +1,26 @@
+From 690d72343918c711f3a25ce2f6ab0554f0b633c2 Mon Sep 17 00:00:00 2001
+From: Ravi Singh <entrance.ravi@gmail.com>
+Date: Wed, 25 Jan 2017 12:21:13 +0530
+Subject: [PATCH 7/9] add file
+
+---
+ hello.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+ create mode 100644 hello.c
+
+diff --git a/hello.c b/hello.c
+new file mode 100644
+index 0000000..4ea0e1e
+--- /dev/null
++++ b/hello.c
+@@ -0,0 +1,7 @@
++#include <stdio.h>
++
++int main()
++{
++	printf("hellow World");
++	return 0;
++}
+-- 
+2.1.4
+

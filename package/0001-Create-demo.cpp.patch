@@ -1,0 +1,24 @@
+From 183dc7e5ee1167b93f52c0b9f6b82782fd5b7e1b Mon Sep 17 00:00:00 2001
+From: r14152 <entrance.ravi@gmail.com>
+Date: Wed, 25 Jan 2017 12:45:56 +0530
+Subject: [PATCH 1/2] Create demo.cpp
+
+---
+ demo.cpp | 5 +++++
+ 1 file changed, 5 insertions(+)
+ create mode 100644 demo.cpp
+
+diff --git a/demo.cpp b/demo.cpp
+new file mode 100644
+index 0000000..96d49de
+--- /dev/null
++++ b/demo.cpp
+@@ -0,0 +1,5 @@
++#include <stdio>  
++int main()  
++{
++  printf("hello\n");  
++  }
+-- 
+2.1.4
+

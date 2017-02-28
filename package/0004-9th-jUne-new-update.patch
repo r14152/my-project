@@ -1,0 +1,623 @@
+From 32f80c946b426a208798c710c220a5b1c5c33e2b Mon Sep 17 00:00:00 2001
+From: r14152 <entrance.ravi@gmail.com>
+Date: Mon, 9 Jan 2017 16:36:26 +0530
+Subject: [PATCH 4/9] 9th jUne new update
+
+---
+ compressAndDecomepree.py |  55 ++++++------
+ configuration.json       |   5 ++
+ main2.py                 | 219 +++++++++++++++++++++++++++++++++++++++++++++++
+ main3.py                 | 156 +++++++++++++++++++++++++++++++++
+ main4.py                 | 131 ++++++++++++++++++++++++++++
+ 5 files changed, 541 insertions(+), 25 deletions(-)
+ create mode 100644 configuration.json
+ create mode 100644 main2.py
+ create mode 100644 main3.py
+ create mode 100644 main4.py
+
+diff --git a/compressAndDecomepree.py b/compressAndDecomepree.py
+index ecaa5b2..8b71df0 100644
+--- a/compressAndDecomepree.py
++++ b/compressAndDecomepree.py
+@@ -38,33 +38,38 @@ def fileCompres(keyStamp):
+ 	conn = sqlite3.connect('tempDb.db')
+ 	cur = conn.cursor()
+ 	#temporary table later taken from configuration file with try and catch
++	cur.execute("select fileName from aaa order by priority;")
++	result = cur.fetchall()
+ 	#result=cur.execute("select * from details,aaa where 
+ 						#details.fileName=aaa.fileName and aaa.timeDetails>keyStamp")	
+ 	#cur.execute("drop table")
+-	cur.execute("select * from details");
+-	result = cur.fetchall()
+-	#conn.close()
+-	data=""
+-	for row in result:
+-		for uniqueData in row:
+-			if type(uniqueData) != int:
+-				data +=uniqueData+" "
+-			else:
+-				data +=str(uniqueData)
+-		data +=' $ '
+-	tempFile ='ravi'
+-	uniQueCode = compressFile(data,tempFile)
+-	key = uniQueCode[0]
+-	fileName = uniQueCode[1]
+-	conn.execute('''create table if not exists storeDb(key str,finalData blob);''')
+-	if os.path.exists(os.getcwd()+'/'+fileName):
+-			print "come"
+-			with open(os.getcwd()+'/'+fileName,'rb') as fileData:
+-				ablob = fileData.read()
+-				sql = '''insert into storeDb values(?,?);'''
+-				cur.execute(sql,[key,sqlite3.Binary(ablob)])
+-				conn.commit()
++	print result
++	for i in result:
++		fileName1 = str(i[0])
++		cur.execute("select * from details where details.fileName='"+fileName1+"';");
++		res = cur.fetchall()
++		#conn.close()
++		data=""
++		for row in res:
++			for uniqueData in row:
++				if type(uniqueData) != int:
++					data +=uniqueData+" "
++				else:
++					data +=str(uniqueData)
++			data +=' $ '
++		tempFile =fileName1
++		uniQueCode = compressFile(data,tempFile)
++		key = uniQueCode[0]
++		fileName = uniQueCode[1]
++		conn.execute('''create table if not exists storeDb(key str,finalData blob);''')
++		if os.path.exists(os.getcwd()+'/'+fileName):
++				print "come"
++				with open(os.getcwd()+'/'+fileName,'rb') as fileData:
++					ablob = fileData.read()
++					sql = '''insert into storeDb values(?,?);'''
++					cur.execute(sql,[key,sqlite3.Binary(ablob)])
++					conn.commit()
+ 				#dbNew.close()
+-			fileData.close()
+-	conn.close()
++				fileData.close()
++		#conn.close()
+ fileCompres(14152)
+diff --git a/configuration.json b/configuration.json
+new file mode 100644
+index 0000000..1db6412
+--- /dev/null
++++ b/configuration.json
+@@ -0,0 +1,5 @@
++{
++    "sleepTime":3,
++    "database":"tempDb",
++    "path":"~/sem6/se2/final"
++}
+diff --git a/main2.py b/main2.py
+new file mode 100644
+index 0000000..11c0784
+--- /dev/null
++++ b/main2.py
+@@ -0,0 +1,219 @@
++import sys,sqlite3
++import os,re
++import json
++
++with open('configuration.json') as fp1:
++    data1 = json.load(fp1)
++sleepTime=data1['sleepTime']
++path=data1['path']
++database=data1['database']
++#print sleepTime,path,database
++
++path=os.path.expanduser(path)
++s=os.listdir(path)
++'''
++a=[]
++for i in s:
++    i=i.split('.')
++    i[len(i)-1]=int(i[len(i)-1])
++    a.append(i)
++   
++sorted_list = sorted(a, key=lambda x:x[2])
++'''
++#print a
++#print sorted_list
++a=[]
++'''
++for i in sorted_list:
++     i[len(i)-1]=str(i[len(i)-1])
++for i in sorted_list:
++    a.append('.'.join(i))
++print a
++for i in a:
++    #print path+'/'+i
++    k= os.stat(path+'/'+i).st_mtime
++    print k
++'''
++
++
++with open('demo2.json') as fp:
++    data = json.load(fp)
++
++dbName=database+'.db'
++#print dbName
++#sqlite3 demo2.db
++conn = sqlite3.connect(dbName)
++print "Opened database successfully";
++cur=conn.cursor()
++#conn.execute('''drop table details;''')
++conn.execute(
++'''CREATE TABLE details
++       (firstName nvarchar(30) NOT NULL,
++        middleName nvarchar(30),
++        lastName nvarchar(30) NOT NULL,
++        age nvarchar(3),
++        streetAddress nvarchar(30) NOT NULL,
++        state nvarchar(30) NOT NULL,
++        city nvarchar(30) NOT NULL,
++        postalCode nvarchar(6) NOT NULL, 
++        type1 nvarchar(30),
++        phNo1 nvarchar(15),
++        type2 nvarchar(30),
++        phNo2 nvarchar(15),
++        type3 nvarchar(30),
++        phNo3 nvarchar(15)
++        );'''
++)
++
++
++print "Table created successfully";
++
++for i in range(0,len(data['persons'])):
++     q=[]
++     q.append(data['persons'][i]['firstName'])
++     if data['persons'][i].has_key('middleName') :
++         q.append(data['persons'][i]['middleName'])
++     else:
++         q.append('')
++     
++     q.append(data['persons'][i]['lastName'])
++     if data['persons'][i].has_key('age'):
++         q.append(data['persons'][i]['age'])
++     else:
++         q.append('')
++     #(data['persons'][i]['age'])
++     #q.append(data['persons'][i]['age'])
++     for j in range(0,len(data['persons'][i]['phoneNumbers'])):
++         q.append(data['persons'][i]['phoneNumbers'][j]['type'])
++         q.append(data['persons'][i]['phoneNumbers'][j]['number'])
++   
++     q.append(data['persons'][i]['address']['streetAddress'])
++     q.append(data['persons'][i]['address']['city'])
++     q.append(data['persons'][i]['address']['state'])
++     q.append(data['persons'][i]['address']['postalCode'])    
++     cur.execute("insert into details values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",q);
++print "data insert sucessfully"
++#cur.execute("INSERT INTO details values('Sachin','Ishwar','Sendulkar','22','A304, Golden apartments','nupe','hm','411008')");
++conn.commit()
++cur.execute("select * from details");
++result=cur.fetchall()
++print result
++conn.close()
++
++
++conn = sqlite3.connect('tempDb_json.db')
++print "Opened database successfully";
++cur=conn.cursor()
++#conn.execute('''drop table validInfo;''')
++conn.execute(
++'''CREATE TABLE validInfo
++       (firstName nvarchar(30) NOT NULL,
++        middleName nvarchar(30),
++        lastName nvarchar(30) NOT NULL,
++        age int(3),
++        type1 nvarchar(30),
++        phNo1 nvarchar(15),
++        type2 nvarchar(30),
++        phNo2 nvarchar(15),
++        type3 nvarchar(30),
++        phNo3 nvarchar(15),
++        postalCode nvarchar(6) NOT NULL, 
++        streetAddress nvarchar(30) NOT NULL,
++        city nvarchar(30) NOT NULL,
++        state nvarchar(30) NOT NULL
++        );'''
++)
++
++for i in result:
++    q=[]
++    flag=0
++    index=[0,2]
++    for j in range(0,len(index)):
++        chk=i[index[j]]
++        if not re.match("[A-Za-z]*$",chk):
++            print "Invalid lastName "+chk
++            flag=1
++            break
++        else:
++            q.insert(index[j],chk)
++    if flag==1:
++       continue
++  
++    index=[1,4,6,8]
++    for j in range(0,len(index)):
++        chk=i[index[j]]
++        if chk!='':
++            if not re.match("[A-Za-z]*$",chk):
++                      print "Invalid  "+chk
++                      flag=1
++                      break
++            else:
++                      q.insert(index[j],chk)
++        
++        else:
++            q.insert(index[j],'')
++            
++    if flag==1:
++       continue
++
++    chk=i[3]
++    #print chk,index[j]
++    if chk!='':
++          if not re.match("[0-9]{2,3}$",chk):
++                 print "Invalid  "+chk
++                 #flag=1
++                 continue
++          else:
++                 q.insert(3,int(chk))
++        
++    else:
++          q.insert(3,'')
++    
++    index=[5,7,9]
++    for j in range(0,len(index)):
++        chk=i[index[j]]
++        if chk!='':
++             if re.match("[0-9]{3}[-]+[0-9-]{8}$",chk) or re.match("[0-9]{10}$",chk):
++                      q.insert(index[j],chk)                
++             else:
++                      print "Invalid  "+chk
++                      flag=1
++                      break
++                      
++        
++        else:
++            q.insert(index[j],'')
++            
++    if flag==1:
++       continue
++    q.insert(10,i[10])
++    index=[11,12]
++    for j in range(0,len(index)):
++        chk=i[index[j]]
++        if not re.match("[A-Za-z]*$",chk):
++            print "Invalid lastName "+chk
++            flag=1
++            break
++        else:
++            q.insert(index[j],chk)
++    if flag==1:
++       continue
++    chk=i[13]
++    if re.match("[0-9]{6}$",chk):
++             q.insert(13,chk) 
++    else:
++            print "Invalid streetAddress "+chk
++            continue 
++        
++            
++    
++    #print q    
++    cur.execute("insert into validInfo values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",q);
++
++
++print "Table created successfully";
++conn.commit()
++cur.execute("select * from validInfo");
++result=cur.fetchall()
++print result
++conn.close()
+diff --git a/main3.py b/main3.py
+new file mode 100644
+index 0000000..a9c61cb
+--- /dev/null
++++ b/main3.py
+@@ -0,0 +1,156 @@
++import sys,sqlite3
++import os,re
++import json,time
++
++dbName='tempDb.db'
++conn = sqlite3.connect(dbName)
++cur=conn.cursor()
++
++conn.execute(
++        '''create table if not exists aaa(priority int,timeDetails double,fileName nvarchar(20) primary key); '''
++)
++conn.execute(
++'''
++CREATE TABLE if not exists details
++(firstName nvarchar(30) NOT NULL,
++middleName nvarchar(30),
++lastName nvarchar(30) NOT NULL,
++age nvarchar(3),
++type1 nvarchar(30),
++phNo1 nvarchar(15),
++type2 nvarchar(30),
++phNo2 nvarchar(15),
++type3 nvarchar(30),
++phNo3 nvarchar(15),
++streetAddress nvarchar(30) NOT NULL,
++city nvarchar(30) NOT NULL,
++state nvarchar(30) NOT NULL,
++postalCode nvarchar(6) NOT NULL,
++fileName nvarchar(20),
++FOREIGN KEY (fileName) REFERENCES aaa(fileName)
++);
++
++''')
++
++print "Table created successfully";
++
++def function1(lst,priorityValue):
++        
++        #dbName='tempDb.db'
++        fName=lst[1]
++        k= lst[3]
++        print k
++        with open(lst[2]) as fp:
++                data = json.load(fp)
++        #print data
++
++        #print dbName
++        #sqlite3 demo2.db
++        #conn = sqlite3.connect(dbName)
++        #print "Opened database successfully";
++        #cur=conn.cursor()
++        
++        q=[lst[0],k,fName]
++        #q.append(fName)
++        print q
++        cur.execute("insert into aaa values(?,?,?);",q)
++        for i in range(0,len(data['persons'])):
++                q=[]
++                q.append(data['persons'][i]['firstName'])
++                if data['persons'][i].has_key('middleName') :
++                        q.append(data['persons'][i]['middleName'])
++                else:
++                        q.append('')
++     
++                q.append(data['persons'][i]['lastName'])
++     
++                if data['persons'][i].has_key('age'):
++                        q.append(data['persons'][i]['age'])
++                else:
++                        q.append('')
++                if not  data['persons'][i].has_key('phoneNumbers'):
++                        q.append('','','','','','')
++                else:
++                        for j in range(0,len(data['persons'][i]['phoneNumbers'])):
++                                q.append(data['persons'][i]['phoneNumbers'][j]['type'])
++                                q.append(data['persons'][i]['phoneNumbers'][j]['number'])
++   
++                q.append(data['persons'][i]['address']['streetAddress'])
++                q.append(data['persons'][i]['address']['city'])
++                q.append(data['persons'][i]['address']['state'])
++                q.append(data['persons'][i]['address']['postalCode'])
++                q.append(fName)
++                print q
++                cur.execute("insert into details values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",q);
++        print "data insert sucessfully"
++        q=[fName]
++        result=cur.execute("select * from details,aaa where details.fileName=aaa.fileName and aaa.timeDetails>="+str(priorityValue)+";")
++        result=cur.fetchall()
++        #print result
++
++
++
++
++conn.execute('''drop table priorityTable;''')
++conn.execute('''CREATE TABLE priorityTable(priority int not null,name nvarchar(20) not null,path nvarchar(50) not null, timeStamp double);''')
++priorityValue =0  
++while 1: 
++	path=os.path.expanduser('~/sem6/se2/python/shruti')
++	s=os.listdir(path)
++	a=[]
++        print s
++	maxValue=0
++	for i in s:
++                if not os.path.exists(path+'/'+i):
++                        continue
++		k = os.stat(path+'/'+i).st_mtime
++                print k,i
++		if k>priorityValue:
++                        #print "come"
++			i=i.split('.')
++			ch=(i[len(i)-1])
++                        if re.match("([0-9]*$)",ch):
++				i[len(i)-1]=int(i[len(i)-1])
++				a.append(i)
++				#print "ravi"
++			if k>maxValue:
++				maxValue = k
++			#print "ravi",i,maxValue,priorityValue
++
++	#print "resume ",priorityValue
++	sorted_list = a
++        print a
++	#sorted_list = sorted(a, key=lambda x:x[2])
++	#print a
++	#print sorted_list
++	a=[]
++	for i in sorted_list:
++		i[len(i)-1]=str(i[len(i)-1])
++	#for i in sorted_list:
++		a.append('.'.join(i))
++	print a
++	for i in a:
++		lst =[]
++		priority =int(i.split('.')[-1])
++		#print priority
++		finalPath = path+'/'+i
++		fileName = i
++		k= os.stat(path+'/'+i).st_mtime
++		lst.append(priority)
++		lst.append(fileName)
++		lst.append(finalPath)
++		lst.append(k)
++		conn.execute('insert into priorityTable values(?,?,?,?);',lst)
++                function1(lst,priorityValue)
++	conn.commit()
++        if maxValue>priorityValue:
++		priorityValue = maxValue
++        print priorityValue
++        
++	time.sleep(5)
++        #conn.execute('''delete from aaa;''')
++        #conn.execute('''delete from details;''')
++		#print fileName
++    #print k
++#conn.commit()
++
+diff --git a/main4.py b/main4.py
+new file mode 100644
+index 0000000..2a87f81
+--- /dev/null
++++ b/main4.py
+@@ -0,0 +1,131 @@
++import sys,sqlite3
++import os,re
++import json
++dbName='tempDb.db'
++conn = sqlite3.connect(dbName)
++print "Opened database successfully";
++cur=conn.cursor()
++#resl=cur.execute("select * from aaa,details order by priorityand aaa.fileName=details.fileName");
++#print resl
++cur.execute("select firstName,middleName,lastName,age,type1,phNo1,type2,phNo2,type3,phNo3,streetAddress,city,state,postalCode from details,aaa where aaa.fileName=details.fileName  order by priority;")
++result=cur.fetchall()
++print result
++conn.close()
++
++
++conn = sqlite3.connect('tempDb_json.db')
++print "Opened database successfully";
++cur=conn.cursor()
++conn.execute('''drop table validInfo;''')
++conn.execute(
++'''CREATE TABLE validInfo
++       (firstName nvarchar(30) NOT NULL,
++        middleName nvarchar(30),
++        lastName nvarchar(30) NOT NULL,
++        age int(3),
++        type1 nvarchar(30),
++        phNo1 nvarchar(15),
++        type2 nvarchar(30),
++        phNo2 nvarchar(15),
++        type3 nvarchar(30),
++        phNo3 nvarchar(15),
++        streetAddress nvarchar(30) NOT NULL,
++        city nvarchar(30) NOT NULL,
++        state nvarchar(30) NOT NULL,
++        postalCode nvarchar(6) NOT NULL
++        );'''
++)
++
++for i in result:
++    q=[]
++    flag=0
++    index=[0,2]
++    for j in range(0,len(index)):
++        chk=i[index[j]]
++        if not re.match("[A-Za-z]*$",chk):
++            print "Invalid lastName "+chk
++            flag=1
++            break
++        else:
++            q.insert(index[j],chk)
++    if flag==1:
++       continue
++  
++    index=[1,4,6,8]
++    for j in range(0,len(index)):
++        chk=i[index[j]]
++        if chk!='':
++            if not re.match("[A-Za-z]*$",chk):
++                      print "Invalid  "+chk
++                      flag=1
++                      break
++            else:
++                      q.insert(index[j],chk)
++        
++        else:
++            q.insert(index[j],'')
++            
++    if flag==1:
++       continue
++
++    chk=i[3]
++    #print chk,index[j]
++    if chk!='':
++          if not re.match("[0-9]{2,3}$",chk):
++                 print "Invalid  "+chk
++                 #flag=1
++                 continue
++          else:
++                 q.insert(3,int(chk))
++        
++    else:
++          q.insert(3,'')
++    
++    index=[5,7,9]
++    for j in range(0,len(index)):
++        chk=i[index[j]]
++        if chk!='':
++             if re.match("[0-9]{3}[-]+[0-9-]{8}$",chk) or re.match("[0-9]{10}$",chk):
++                      q.insert(index[j],chk)                
++             else:
++                      print "Invalid  "+chk
++                      flag=1
++                      break
++                      
++        
++        else:
++            q.insert(index[j],'')
++            
++    if flag==1:
++       continue
++    q.insert(10,i[10])
++    index=[11,12]
++    for j in range(0,len(index)):
++        chk=i[index[j]]
++        if not re.match("[A-Za-z]*$",chk):
++            print "Invalid lastName "+chk
++            flag=1
++            break
++        else:
++            q.insert(index[j],chk)
++    if flag==1:
++       continue
++    chk=i[13]
++    if re.match("[0-9]{6}$",chk):
++             q.insert(13,chk) 
++    else:
++            print "Invalid postal code "+chk
++            continue 
++        
++            
++    
++    #print q    
++    cur.execute("insert into validInfo values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",q);
++
++
++print "Table created successfully";
++conn.commit()
++cur.execute("select * from validInfo");
++result=cur.fetchall()
++print result
++conn.close()
+-- 
+2.1.4
+

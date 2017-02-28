@@ -1,0 +1,89 @@
+From e1aa2182645ee5c8f5c27a3ba87e96a6181b79a0 Mon Sep 17 00:00:00 2001
+From: r14152 <entrance.ravi@gmail.com>
+Date: Mon, 9 Jan 2017 09:10:20 +0530
+Subject: [PATCH 3/9] new file which one is used for compress
+
+---
+ compressAndDecomepree.py | 70 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 70 insertions(+)
+ create mode 100644 compressAndDecomepree.py
+
+diff --git a/compressAndDecomepree.py b/compressAndDecomepree.py
+new file mode 100644
+index 0000000..ecaa5b2
+--- /dev/null
++++ b/compressAndDecomepree.py
+@@ -0,0 +1,70 @@
++import zlib
++import gzip
++import os
++import hashlib
++import sqlite3,tarfile
++#create one database which store the md5sum code
++#and the file name for storing that thing
++
++#file which return the md5sum value of the given file
++def hashKeyGen(fileName,blocksize):
++	hasher = hashlib.md5()
++	path =(os.getcwd()+'/'+fileName)
++	print path	
++	data =gzip.open(path,"rb")
++	buf = data.read(blocksize)
++	while(len(buf)>0):
++		hasher.update(buf)
++		buf = data.read(blocksize)
++	data.close()
++	#tarfile.close()
++	return hasher.hexdigest()
++	
++#this function is going to return the key and create the 
++#tar.gz
++def compressFile(data,fileName):
++	lst=[]
++	compressData = zlib.compress(data)
++	f_out = gzip.open(fileName+'.gz',"wb")
++	f_out.write(compressData)
++	fileName +='.gz'
++	lst.append(hashKeyGen(fileName,65556))
++	lst.append(fileName)
++	return lst
++
++#read the database and concat all string
++
++def fileCompres(keyStamp):
++	conn = sqlite3.connect('tempDb.db')
++	cur = conn.cursor()
++	#temporary table later taken from configuration file with try and catch
++	#result=cur.execute("select * from details,aaa where 
++						#details.fileName=aaa.fileName and aaa.timeDetails>keyStamp")	
++	#cur.execute("drop table")
++	cur.execute("select * from details");
++	result = cur.fetchall()
++	#conn.close()
++	data=""
++	for row in result:
++		for uniqueData in row:
++			if type(uniqueData) != int:
++				data +=uniqueData+" "
++			else:
++				data +=str(uniqueData)
++		data +=' $ '
++	tempFile ='ravi'
++	uniQueCode = compressFile(data,tempFile)
++	key = uniQueCode[0]
++	fileName = uniQueCode[1]
++	conn.execute('''create table if not exists storeDb(key str,finalData blob);''')
++	if os.path.exists(os.getcwd()+'/'+fileName):
++			print "come"
++			with open(os.getcwd()+'/'+fileName,'rb') as fileData:
++				ablob = fileData.read()
++				sql = '''insert into storeDb values(?,?);'''
++				cur.execute(sql,[key,sqlite3.Binary(ablob)])
++				conn.commit()
++				#dbNew.close()
++			fileData.close()
++	conn.close()
++fileCompres(14152)
+-- 
+2.1.4
+
